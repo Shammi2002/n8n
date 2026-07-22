@@ -1,0 +1,147 @@
+{
+  "name": "Weather_Report",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        -144
+      ],
+      "id": "c4af1df3-e60d-4004-b84c-84a4e053145e",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -576,
+        16
+      ],
+      "id": "6175f665-cc72-44eb-aa2d-50bf8b808b12",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast?latitude=6.9271&longitude=79.8612&hourly=temperature_2m,rain,wind_speed_10m,wind_direction_10m,soil_temperature_6cm,soil_moisture_1_to_3cm&forecast_days=3",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -288,
+        -32
+      ],
+      "id": "43db3d13-75fd-471e-9f93-d8eb28b09017",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get input JSON\nconst input = $input.first().json;\n\n// Function to recursively find the first array of numbers\nfunction findNumberArray(obj) {\n    if (Array.isArray(obj)) {\n        if (obj.every(item => typeof item === 'number')) {\n            return obj;\n        }\n\n        for (const item of obj) {\n            const result = findNumberArray(item);\n            if (result) return result;\n        }\n    }\n\n    if (typeof obj === 'object' && obj !== null) {\n        for (const key in obj) {\n            const result = findNumberArray(obj[key]);\n            if (result) return result;\n        }\n    }\n\n    return null;\n}\n\n// Find weather values\nconst values = findNumberArray(input);\n\nif (!values) {\n    throw new Error(\n        \"Could not find an array of numbers in the incoming JSON.\"\n    );\n}\n\n// Calculate statistics\nconst min = Math.min(...values);\nconst max = Math.max(...values);\nconst avg = values.reduce((sum, val) => sum + val, 0) / values.length;\n\n// Generate weather message\nlet weatherMessage = \"\";\n\nif (avg < 0.22) {\n    weatherMessage =\n        \"Colombo is expected to experience relatively cool and stable weather conditions today, with only minor variations throughout the forecast period.\";\n} else if (avg < 0.24) {\n    weatherMessage =\n        \"The weather in Colombo is expected to remain warm and pleasant throughout the day. Forecast values indicate stable atmospheric conditions with minimal fluctuations.\";\n} else {\n    weatherMessage =\n        \"Colombo is likely to experience warmer conditions today. Residents should expect a hot and humid day and are advised to stay hydrated.\";\n}\n\n// Append statistics\nweatherMessage += ` Forecast statistics: minimum value = ${min.toFixed(\n    3\n)}, maximum value = ${max.toFixed(\n    3\n)}, and average value = ${avg.toFixed(3)}.`;\n\n// Return output\nreturn [\n    {\n        json: {\n            weather_message: weatherMessage,\n            statistics: {\n                minimum: min,\n                maximum: max,\n                average: avg,\n                total_predictions: values.length\n            }\n        }\n    }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        -32
+      ],
+      "id": "d9b9c73f-0f08-49b4-8bca-d2ae61d20561",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sendTo": "e20392@eng.pdn.ac.lk",
+        "subject": "Weather Report",
+        "emailType": "text",
+        "message": "={{ $json.weather_message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        112,
+        -32
+      ],
+      "id": "2cf2c1a8-feab-467e-8f7f-5213d585b920",
+      "name": "Send a message",
+      "webhookId": "7d3ca0f7-5ed9-403d-af8d-56e43a2c0092",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3DBGLUKswaOwJIlk",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "90d2ec78-e213-4f31-aaf7-7341edebd4b9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7f9abb837ca942707337eb431ec5b1d9032c5a5ff58150276ed89f2619bdfd65"
+  },
+  "nodeGroups": [],
+  "id": "dqnyHc9L58ly6NEU",
+  "tags": []
+}

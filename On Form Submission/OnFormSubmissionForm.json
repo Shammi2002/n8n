@@ -1,0 +1,120 @@
+{
+  "name": "OnFormSubmissionForm",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Contact us",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name"
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email"
+            },
+            {
+              "fieldLabel": "tel.no",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -352,
+        16
+      ],
+      "id": "c3f2192d-a835-48bd-b662-21f5c4e2c280",
+      "name": "On form submission",
+      "webhookId": "6a7d6a64-d2ce-46d6-9023-529978d02730"
+    },
+    {
+      "parameters": {
+        "sendTo": "e20392@eng.pdn.ac.lk",
+        "subject": "New message received from contact form",
+        "message": "=Name : {{ $json.Name }}\n<br>\nEmail: {{ $json.Email }}\n<br>\nTel.No: {{ $json['tel.no'] }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -128,
+        16
+      ],
+      "id": "8d8fd8d2-55e2-4540-8ad0-d13014fa3291",
+      "name": "Send a message",
+      "webhookId": "f812e0cf-e261-4bd5-85ab-561b66c8f5bb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3DBGLUKswaOwJIlk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "thennakoon.sstm@gmail.com",
+        "subject": "New message received from contact form",
+        "message": "=Name:  {{ $('On form submission').item.json.Name }} is submitted the information!",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        112,
+        16
+      ],
+      "id": "20c22e9a-cba2-433f-9090-cf1d0d7b22f6",
+      "name": "Send a message1",
+      "webhookId": "6c9fa2ee-e747-4320-a8fb-cc01d1c151d3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "3DBGLUKswaOwJIlk",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "2da6f89f-77a0-423d-b2c9-5ec02d9da30a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7f9abb837ca942707337eb431ec5b1d9032c5a5ff58150276ed89f2619bdfd65"
+  },
+  "nodeGroups": [],
+  "id": "CZD1JYxeZ8IptChY",
+  "tags": []
+}
